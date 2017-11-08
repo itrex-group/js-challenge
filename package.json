@@ -1,0 +1,22 @@
+{
+  "name": "js-challenge",
+  "description": "",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Alex",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "8.x.x",
+    "npm": "5.x.x"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "async": "^2.6.0",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "moment": "^2.19.1"
+  },
+  "devDependencies": {}
+}
