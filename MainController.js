@@ -53,7 +53,18 @@ class MainController {
     }
 
     nativePromiseVersion(req, res) {
-        res.json({ nothing: true });
+        coffeeService.start();
+
+        const getWater = coffeeService.get('water'),
+            frameMug = coffeeService.get('frameMug'),
+            boilMilk = coffeeService.get('milk').then(() => coffeeService.get('milkBoiled')),
+            grindCoffee = coffeeService.get('coffee').then(() => coffeeService.get('coffeeGrinded')),
+            pourBoiledMilkToMug = Promise.all([boilMilk, frameMug]);
+
+        return Promise.all([getWater, grindCoffee, pourBoiledMilkToMug])
+            .then((result) =>  coffeeService.get('coffeeReadyToGo'))
+            .then(() => res.json({ time: coffeeService.finish()}))
+            .catch((err) => res.json(err));
     }
 
     asyncAwaitVersion(req, res) {
