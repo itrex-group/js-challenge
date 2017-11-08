@@ -58,11 +58,12 @@ class MainController {
         const getWater = coffeeService.get('water'),
             frameMug = coffeeService.get('frameMug'),
             boilMilk = coffeeService.get('milk').then(() => coffeeService.get('milkBoiled')),
-            grindCoffee = coffeeService.get('coffee').then(() => coffeeService.get('coffeeGrinded'));
+            grindCoffee = coffeeService.get('coffee').then(() => coffeeService.get('coffeeGrinded')),
+            pourBoiledMilkToMug = Promise.all([boilMilk, frameMug]);
 
-        return Promise.all([getWater, frameMug, boilMilk, grindCoffee])
+        return Promise.all([getWater, grindCoffee, pourBoiledMilkToMug])
             .then((result) =>  coffeeService.get('coffeeReadyToGo'))
-            .then((result) => res.json({ time: coffeeService.finish(result)}))
+            .then(() => res.json({ time: coffeeService.finish()}))
             .catch((err) => res.json(err));
     }
 

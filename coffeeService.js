@@ -12,10 +12,7 @@ class CookingService {
     }
 
     finish(obj) {
-        if (obj.getMilk && obj.getWater && obj.getCoffee && obj.boilMilk && obj.grindCoffee && obj.frameMug && obj.makeCoffee && obj.pourBoiledMilkToMug) {
-            return moment().diff(this.startTime, 'seconds');
-        }
-        return new Error('Coffee not ready, sorry');
+        return moment().diff(this.startTime, 'seconds');
     }
 
     get(param) {
