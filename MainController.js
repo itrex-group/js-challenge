@@ -38,7 +38,11 @@ class MainController {
                 coffeeService.get('mugFramed')
                     .then((data) => callback(null, data));
             },
-            makeCoffee: ['getWater', 'frameMug', 'grindCoffee', 'boilMilk', (result, callback) => {
+            pourBoiledMilkToMug: ['frameMug', 'boilMilk', (result, callback) => {
+                coffeeService.get('milkInMug')
+                    .then((data) => callback(null, data));
+            }],
+            makeCoffee: ['getWater', 'pourBoiledMilkToMug', 'grindCoffee', (result, callback) => {
                 coffeeService.get('coffeeReadyToGo')
                     .then((data) => callback(null, data));
             }]
