@@ -1,12 +1,29 @@
 const
     coffeeService = require('./coffeeService'),
+    Observable = require('rxjs/Observable').Observable,
     async = require('async');
+
+require('rxjs/add/observable/from');
+require('rxjs/add/observable/zip');
+require('rxjs/add/observable/concat');
+require('rxjs/add/operator/switchMap');
+require('rxjs/add/operator/do');
 
 
 class MainController {
 
     main(req, res) {
-        res.json({ text: 'Hello' });
+        res.send(`
+            <body>
+                <ul>
+
+                    <li><a href="/asyncVersion">asyncVersion</a></li>
+                    <li><a href="/nativePromiseVersion">nativePromiseVersion</a></li>
+                    <li><a href="/asyncAwaitVersion">asyncAwaitVersion</a></li>
+                    <li><a href="/rxJSVersion">rxJSVersion</a></li>
+                </ul>
+            </body>
+        `)
     }
 
     asyncVersion(req, res) {
@@ -72,9 +89,29 @@ class MainController {
     }
 
     rxJSVersion(req, res) {
-        res.json({ nothing: true });
-    }
+        coffeeService.start();
 
+        const getWater$ = Observable.from(coffeeService.get('water'));
+
+        const frameMug$ = Observable.from(coffeeService.get('frameMug'));
+
+        const boilMilk$ = Observable.from(coffeeService.get('milk'))
+            .switchMap(() => Observable.from(coffeeService.get('milkBoiled')));
+
+        const grindCofee$ = Observable.from(coffeeService.get('coffe'))
+            .switchMap(() => Observable.from(coffeeService.get('coffeeGrinded')));
+
+        const pourBoiledMilkToMug$ = Observable.zip(boilMilk$, frameMug$);
+
+
+        Observable.zip(getWater$, grindCofee$, pourBoiledMilkToMug$)
+            .switchMap(() => Observable.from(coffeeService.get('coffeeReadyToGo')))
+            .subscribe(
+                val => res.json({ time: coffeeService.finish() }),
+                err => res.json({ err: err.message || 'ERROR' }),
+                () => console.log('done')
+            );
+    }
 }
 
 module.exports = new MainController();
