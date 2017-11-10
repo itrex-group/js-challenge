@@ -5,9 +5,11 @@ const
 
 require('rxjs/add/observable/from');
 require('rxjs/add/observable/zip');
+require('rxjs/add/observable/of');
 require('rxjs/add/observable/concat');
 require('rxjs/add/operator/switchMap');
 require('rxjs/add/operator/do');
+require('rxjs/add/operator/map');
 
 
 class MainController {
@@ -91,23 +93,36 @@ class MainController {
     rxJSVersion(req, res) {
         coffeeService.start();
 
-        const getWater$ = Observable.from(coffeeService.get('water'));
+        const getWater$ = Observable.from(coffeeService.get('water'))
+            .map(water => ({ water }));
 
-        const frameMug$ = Observable.from(coffeeService.get('frameMug'));
+        const frameMug$ = Observable.from(coffeeService.get('frameMug'))
+            .map(frameMug => ({ frameMug }));
 
         const boilMilk$ = Observable.from(coffeeService.get('milk'))
-            .switchMap(() => Observable.from(coffeeService.get('milkBoiled')));
+            .switchMap(() => Observable.from(coffeeService.get('milkBoiled')))
+            .map(milkBoiled => ({ milkBoiled }));
 
-        const grindCofee$ = Observable.from(coffeeService.get('coffe'))
-            .switchMap(() => Observable.from(coffeeService.get('coffeeGrinded')));
+        const grindCoffee$ = Observable.from(coffeeService.get('coffee'))
+            .switchMap(() => Observable.from(coffeeService.get('coffeeGrinded')))
+            .map(coffeeGrinded => ({ coffeeGrinded }));
 
-        const pourBoiledMilkToMug$ = Observable.zip(boilMilk$, frameMug$);
+        const pourBoiledMilkToMug$ = Observable.zip(boilMilk$, frameMug$)
+            .map(([milkBoiled, frameMug]) => ({...milkBoiled, ...frameMug}));
 
 
-        Observable.zip(getWater$, grindCofee$, pourBoiledMilkToMug$)
-            .switchMap(() => Observable.from(coffeeService.get('coffeeReadyToGo')))
+        Observable.zip(getWater$, grindCoffee$, pourBoiledMilkToMug$)
+            .switchMap(([getWater, grindCoffee, pourBoiledMilkToMug]) => {
+                return Observable.from(coffeeService.get('coffeeReadyToGo'))
+                    .map(coffeReadyToGo => ({
+                        ...getWater,
+                        ...grindCoffee,
+                        ...pourBoiledMilkToMug,
+                        coffeReadyToGo,
+                    }));
+            })
             .subscribe(
-                val => res.json({ time: coffeeService.finish() }),
+                result => res.json(coffeeService.finish(result)),
                 err => res.json({ err: err.message || 'ERROR' }),
                 () => console.log('done')
             );

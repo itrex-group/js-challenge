@@ -11,15 +11,22 @@ class CookingService {
         this.startTime = moment();
     }
 
-    finish(obj) {
-        return moment().diff(this.startTime, 'seconds');
+    finish(result) {
+        return {
+            result,
+            totalTime: moment().diff(this.startTime, 'seconds')
+        }
     }
 
     get(param) {
         return new Promise((resolve, reject) => {
+            const time = this.randomTime();
             setTimeout(() => {
-                resolve(true);
-            }, this.randomTime());
+                resolve({
+                    param,
+                    time
+                });
+            }, time);
         });
     }
 
